@@ -1,6 +1,12 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, Menu, globalShortcut } from 'electron'
+import {
+    app,
+    protocol,
+    BrowserWindow,
+    Menu,
+    globalShortcut
+} from 'electron'
 import {
     createProtocol,
     installVueDevtools
@@ -12,12 +18,22 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 let win
 
 // Scheme must be registered before the app is ready
-protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }])
+protocol.registerSchemesAsPrivileged([{
+    scheme: 'app',
+    privileges: {
+        secure: true,
+        standard: true
+    }
+}])
 
 function createWindow() {
     // Create the browser window.
     win = new BrowserWindow({
-        width: 1920, height: 1080, webPreferences: {
+        width: 1920,
+        height: 1080,
+        minWidth: 1000,
+        minHeight: 700,
+        webPreferences: {
             webSecurity: false,
             nodeIntegration: true
         }
@@ -43,17 +59,16 @@ function createWindow() {
 function createMenu() {
     // darwin表示macOS，针对macOS的设置
     if (process.platform === 'darwin') {
-        const template = [
-            {
-                label: 'App Demo',
-                submenu: [
-                    {
-                        role: 'about'
-                    },
-                    {
-                        role: 'quit'
-                    }]
-            }]
+        const template = [{
+            label: 'App Demo',
+            submenu: [{
+                    role: 'about'
+                },
+                {
+                    role: 'quit'
+                }
+            ]
+        }]
         let menu = Menu.buildFromTemplate(template)
         Menu.setApplicationMenu(menu)
     } else {
