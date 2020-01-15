@@ -1,20 +1,20 @@
 <template>
     <div class="home">
-        <HelloWorld bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+        <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
             readChapter="100" />
-        <HelloWorld bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+        <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
             readChapter="100" />
     </div>
 </template>
 
 <script>
     // @ is an alias to /src
-    import HelloWorld from '@/components/HelloWorld.vue'
+    import Book from '@/components/Book.vue'
 
     export default {
         name: 'home',
         components: {
-            HelloWorld
+            Book
         }
     }
 </script>
