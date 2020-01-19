@@ -12,7 +12,8 @@
         </div>
         <div class='setting-wrapper'>
             <h4>基本设定</h4>
-            
+            <div class="setting">编辑书籍</div>
+            <div class="setting" @click="changeMode">{{mode}}</div>
         </div>
     </div>
 </template>
@@ -28,7 +29,7 @@
         },
         data() {
             return {
-                bookName: this.latestBook
+                bookName: this.latestBook,
             }
         },
         computed: {
@@ -39,8 +40,20 @@
                     return this.bookName;
                 }
 
+            },
+            mode() {
+                if (this.$store.state.mode == "sun"){
+                    return "夜间模式";
+                } else{
+                    return "日间模式";
+                }
             }
         },
+        methods:{
+            changeMode(){
+                this.$store.commit('changeMode');
+            }
+        }
     }
 </script>
 
@@ -83,12 +96,12 @@
         text-align: left;
         padding: 15px 15px;
     }
-    .history{
+    .history,.setting{
         padding: 8px 40px;
         font-weight: 800;
         font-size: 14px;
     }
-    .history:hover{
+    .history:hover,.setting:hover{
         background-color: #e1e0e0;
     }
 
