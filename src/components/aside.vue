@@ -12,7 +12,15 @@
         </div>
         <div class='setting-wrapper'>
             <h4>基本设定</h4>
-            <div class="setting">编辑书籍</div>
+            <div class="setting" @click="editBook">
+                编辑书籍
+                <transition name="button-fade">
+                    <button v-if="edit" class="btn btn-primary btn-xs" @click="cancelEdit">取消</button>
+                </transition>
+                <transition name="button-fade">
+                    <button v-if="edit" class="btn btn-danger btn-xs">全部删除</button>
+                </transition>
+            </div>
             <div class="setting" @click="changeMode">{{mode}}</div>
         </div>
     </div>
@@ -47,11 +55,21 @@
                 } else{
                     return "日间模式";
                 }
+            },
+            edit(){
+                return this.$store.state.edit;
             }
         },
         methods:{
             changeMode(){
                 this.$store.commit('changeMode');
+            },
+            editBook(){
+                this.$store.commit('editBook');
+            },
+            cancelEdit(event){
+                event.stopPropagation();
+                this.$store.commit('cancelEdit');
             }
         }
     }
@@ -97,9 +115,22 @@
         padding: 15px 15px;
     }
     .history,.setting{
-        padding: 8px 40px;
+        padding: 8px 25px;
         font-weight: 800;
         font-size: 14px;
+        cursor: pointer;
+        user-select: none;
+    }
+    .setting button{
+        float: right;
+        margin-right: 8px;
+    }
+    .button-fade-enter-active, .button-fade-leave-active {
+      transition: all .3s;
+    }
+    .button-fade-enter,.button-fade-leave-to{
+        opacity: 0;
+        transform: translateX(30px);
     }
     .history:hover,.setting:hover{
         background-color: #e1e0e0;

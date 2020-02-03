@@ -12,6 +12,9 @@
                 <div class="intro">冰冷与黑暗并存的宇宙深处，九具庞大的龙尸拉着一口青铜古棺，亘古长存。这是太空探测器在枯寂的宇宙中捕捉到的一幅极其震撼的画面。九龙拉棺，究竟是回到了上古，还是来到了星空的彼岸？一个浩大的仙侠世界，光怪陆离，神秘无尽。热血似火山沸腾，激情若瀚海汹涌，欲望如深渊无止境……登天路，踏歌行，弹指遮天。......</div>
             </div>
         </div>
+        <transition name="button-fade">
+            <button v-if="edit" class="btn btn-danger btn-xs editButton">删除</button>    
+        </transition>
     </div>
 </template>
 
@@ -40,7 +43,12 @@
             return {
                 unreadChapter: 1000,
                 author: "辰东",
-                lastreadChapter: "第一百章 满地找牙"
+                lastreadChapter: "第一百章 满地找牙",
+            }
+        },
+        computed:{
+            edit: function(){
+                return this.$store.state.edit;
             }
         },
         mounted: function() {
@@ -53,6 +61,7 @@
 <style scoped>
     .book {
         padding: 20px;
+        position: relative;
     }
 
     .book:hover {
@@ -90,5 +99,22 @@
         font-weight: 700;
         display: inline-block;
         margin-right: 10px;
+    }
+    .editButton {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-weight: bold;
+        outline: none;
+    }
+    .editButton:active{
+        outline: none;
+    }
+    .button-fade-enter-active, .button-fade-leave-active {
+      transition: all .3s;
+    }
+    .button-fade-enter,.button-fade-leave-to{
+        opacity: 0;
+        transform: translateY(30px);
     }
 </style>

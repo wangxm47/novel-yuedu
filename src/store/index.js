@@ -5,7 +5,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-      mode: 'sun'
+      mode: 'sun',
+      edit: false
   },
   mutations: {
       changeMode: function(state){
@@ -13,6 +14,16 @@ export default new Vuex.Store({
               state.mode = "night";
           } else{
               state.mode = "sun"
+          }
+      },
+      editBook: function(state){
+          if(!state.edit){
+              state.edit = true;
+          }
+      },
+      cancelEdit: function(state){
+          if(state.edit){
+              state.edit = false;
           }
       }
   },

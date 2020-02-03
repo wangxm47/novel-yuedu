@@ -15,7 +15,7 @@
 <script>
     // @ is an alias to /src
     import Book from '@/components/Book.vue'
-    import Aside from '../components/aside.vue'
+    import Aside from '@/components/aside.vue'
     export default {
         name: 'home',
         components: {
