@@ -4,7 +4,7 @@
         <h3>读万卷书,行万里路</h3>
         <div class='search'>
             <span class="icon line"></span>
-            <input placeholder="搜索书籍" class='input line' type="text" autocomplete="off">
+            <input placeholder="搜索书籍" v-model="searchKey" class='input line' type="text" autocomplete="off" @keydown.enter="searchBook()">
         </div>
         <div class='history-wrapper'>
             <h4>最近阅读</h4>
@@ -15,7 +15,7 @@
             <div class="setting" @click="editBook">
                 编辑书籍
                 <transition name="button-fade">
-                    <button v-if="edit" class="btn btn-primary btn-xs" @click="cancelEdit">取消</button>
+                    <button v-if="edit" class="btn btn-primary btn-xs" @click.stop="cancelEdit">取消</button>
                 </transition>
                 <transition name="button-fade">
                     <button v-if="edit" class="btn btn-danger btn-xs">全部删除</button>
@@ -38,6 +38,7 @@
         data() {
             return {
                 bookName: this.latestBook,
+                searchKey: ""
             }
         },
         computed: {
@@ -67,9 +68,11 @@
             editBook(){
                 this.$store.commit('editBook');
             },
-            cancelEdit(event){
-                event.stopPropagation();
+            cancelEdit(){
                 this.$store.commit('cancelEdit');
+            },
+            searchBook(){
+                
             }
         }
     }
@@ -124,6 +127,10 @@
     .setting button{
         float: right;
         margin-right: 8px;
+        outline: none;
+    }
+    .setting button:active{
+        outline: none;
     }
     .button-fade-enter-active, .button-fade-leave-active {
       transition: all .3s;
@@ -151,7 +158,7 @@
         line-height: 25px;
         height: 25px;
     }
-
+    
     .icon {
         position: absolute;
         left: 25px;
