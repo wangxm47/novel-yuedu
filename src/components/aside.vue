@@ -4,7 +4,8 @@
         <h3>读万卷书,行万里路</h3>
         <div class='search'>
             <span class="icon line"></span>
-            <input placeholder="搜索书籍" v-model="searchKey" class='input line' type="text" autocomplete="off" @keydown.enter="searchBook()">
+            <input placeholder="搜索书籍" v-model="searchKey" class='input line' type="text" autocomplete="off"
+                @keydown.enter="searchBook()">
         </div>
         <div class='history-wrapper'>
             <h4>最近阅读</h4>
@@ -51,38 +52,36 @@
 
             },
             mode() {
-                if (this.$store.state.mode == "sun"){
+                if (this.$store.state.mode == "sun") {
                     return "夜间模式";
-                } else{
+                } else {
                     return "日间模式";
                 }
             },
-            edit(){
+            edit() {
                 return this.$store.state.edit;
             }
         },
-        methods:{
-            changeMode(){
+        methods: {
+            changeMode() {
                 this.$store.commit('changeMode');
             },
-            editBook(){
+            editBook() {
                 this.$store.commit('editBook');
             },
-            cancelEdit(){
+            cancelEdit() {
                 this.$store.commit('cancelEdit');
             },
-            searchBook(){
-                if(this.searchKey=="") return;
-                var that = this;
-                this.$http.get("./source.json").then((response)=>{
+            searchBook() {
+                if (this.searchKey == "") return;
+                this.$http.get("./source.json").then((response) => {
                     return response.data.searchUrl;
-                }).then((searchUrl)=>{
-                    this.$http.get(searchUrl+that.searchKey).then((response)=>{
-                        //console.log(response.data);
-                        return response;
+                }).then((searchUrl) => {
+                    this.$http.get(searchUrl+this.searchKey).then((response) => {
+                        console.log(response.data)
                     })
                 });
-                
+
             }
         }
     }
@@ -114,7 +113,8 @@
         width: 100%;
         padding: 0 20px;
     }
-    .history-wrapper{
+
+    .history-wrapper {
         margin-top: 40px;
         width: 100%;
         padding: 15px 15px;
@@ -122,34 +122,45 @@
         border-top: 1px #e3e3e3 solid;
         border-bottom: 1px #e3e3e3 solid;
     }
-    .setting-wrapper{
+
+    .setting-wrapper {
         width: 100%;
         text-align: left;
         padding: 15px 15px;
     }
-    .history,.setting{
+
+    .history,
+    .setting {
         padding: 8px 25px;
         font-weight: 800;
         font-size: 14px;
         cursor: pointer;
         user-select: none;
     }
-    .setting button{
+
+    .setting button {
         float: right;
         margin-right: 8px;
         outline: none;
     }
-    .setting button:active{
+
+    .setting button:active {
         outline: none;
     }
-    .button-fade-enter-active, .button-fade-leave-active {
-      transition: all .3s;
+
+    .button-fade-enter-active,
+    .button-fade-leave-active {
+        transition: all .3s;
     }
-    .button-fade-enter,.button-fade-leave-to{
+
+    .button-fade-enter,
+    .button-fade-leave-to {
         opacity: 0;
         transform: translateX(30px);
     }
-    .history:hover,.setting:hover{
+
+    .history:hover,
+    .setting:hover {
         background-color: #e1e0e0;
     }
 
@@ -168,7 +179,7 @@
         line-height: 25px;
         height: 25px;
     }
-    
+
     .icon {
         position: absolute;
         left: 25px;
