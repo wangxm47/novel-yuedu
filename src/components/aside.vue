@@ -78,7 +78,8 @@
                     return response.data.searchUrl;
                 }).then((searchUrl)=>{
                     this.$http.get(searchUrl+that.searchKey).then((response)=>{
-                        console.log(response.data);
+                        //console.log(response.data);
+                        return response;
                     })
                 });
                 
