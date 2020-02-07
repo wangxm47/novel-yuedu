@@ -72,6 +72,15 @@
                 this.$store.commit('cancelEdit');
             },
             searchBook(){
+                if(this.searchKey=="") return;
+                var that = this;
+                this.$http.get("./source.json").then((response)=>{
+                    return response.data.searchUrl;
+                }).then((searchUrl)=>{
+                    this.$http.get(searchUrl+that.searchKey).then((response)=>{
+                        console.log(response.data);
+                    })
+                });
                 
             }
         }
