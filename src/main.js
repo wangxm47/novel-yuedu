@@ -4,6 +4,15 @@ import router from './router'
 import store from './store'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import Datastore from 'lowdb'
+import LodashId from 'lodash-id'
+import FileSync from 'lowdb/adapters/FileSync'
+
+const adapter = new FileSync("./src/db/data.json"); // 初始化lowdb读写的json文件名以及存储路径
+const db = Datastore(adapter);// lowdb接管该文件
+db._.mixin(LodashId)
+
+Vue.prototype.$db = db;
 Vue.use(VueAxios, axios)
 Vue.config.productionTip = false
 

@@ -74,14 +74,11 @@
             },
             searchBook() {
                 if (this.searchKey == "") return;
-                this.$http.get("./source.json").then((response) => {
-                    return response.data.searchUrl;
-                }).then((searchUrl) => {
-                    this.$http.get(searchUrl+this.searchKey).then((response) => {
-                        console.log(response.data)
+                this.$http.get(this.$db.read().get("bookSource").find({id:1}).value().searchUrl+
+                    this.searchKey).then((res)=>{
+                        console.log(res.data);
+                        this.searchKey=""
                     })
-                });
-
             }
         }
     }
