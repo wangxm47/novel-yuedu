@@ -15,6 +15,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
+    "iconv-lite": "^0.5.1",
     "lodash-id": "^0.14.0",
     "lowdb": "^1.0.0",
     "vue": "^2.6.11",

@@ -1,9 +1,17 @@
 <template>
     <div class="home">
-        <div class = 'aside wrapper-padding'>
+        <div class='aside wrapper-padding'>
             <Aside />
         </div>
-        <div class="books wrapper-padding">
+        <div class="books wrapper-padding" @scroll="scrollBook">
+            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+                readChapter="100" />
+            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+                readChapter="100" />
+            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+                readChapter="100" />
+            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+                readChapter="100" />
             <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
                 readChapter="100" />
             <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
@@ -21,25 +29,45 @@
         components: {
             Book,
             Aside
+        },
+        methods: {
+            scrollBook(event) {
+                var scrollHeight = event.target.scrollHeight;
+                var scrollTop = event.target.scrollTop;
+                var clientHeight = event.target.clientHeight;
+                if(scrollHeight-scrollTop-clientHeight < 1){
+                    console.log("滚到底了");
+                }
+            }
         }
     }
 </script>
 <style scoped="scoped">
-    .home{
+    .home {
         display: flex;
         min-width: 800px;
         min-height: 500px;
+        height: 100%;
     }
-    .wrapper-padding{
+
+    .wrapper-padding {
         padding: 25px 20px;
     }
-    .aside{
+
+    .aside {
+        width: 320px;
         min-width: 320px;
         background-color: #f7f7f7;
-        height: 100vh;
         overflow: hidden;
     }
-    .books{
+
+    .books {
         flex: 1;
+        display: block;
+        overflow: auto;
+    }
+
+    .books::-webkit-scrollbar {
+        display: none;
     }
 </style>

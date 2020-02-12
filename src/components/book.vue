@@ -51,9 +51,6 @@
                 return this.$store.state.edit;
             }
         },
-        mounted: function() {
-            //console.log("mounted")
-        }
     }
 </script>
 
