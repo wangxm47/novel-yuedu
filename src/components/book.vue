@@ -1,8 +1,8 @@
 <template>
-    <div class='book'>
+    <div class='book' @contextmenu="clickRightMouse">
         <div class='media'>
             <div class="media-left">
-                <img class="media-object bookImage" :src="bookImageSrc" />
+                <img class="media-object bookImage" :src="bookImageSrc" loading = "lazy" draggable="false"/>
             </div>
             <div class="media-body bookBody">
                 <h3 class="media-heading title">{{bookName}}</h3>
@@ -37,13 +37,18 @@
             readChapter: {
                 type: String,
                 required: true
-            }
+            },
         },
         data: function() {
             return {
                 unreadChapter: 1000,
                 author: "辰东",
                 lastreadChapter: "第一百章 满地找牙",
+            }
+        },
+        methods:{
+            clickRightMouse(e){
+                e.preventDefault();
             }
         },
         computed:{
@@ -59,6 +64,7 @@
     .book {
         padding: 20px;
         position: relative;
+        user-select: none;
     }
 
     .book:hover {

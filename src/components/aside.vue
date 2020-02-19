@@ -58,13 +58,8 @@
             return {
                 bookName: this.latestBook,
                 searchKey: "",
-                searchHistory: this.$db.get("searchHistory").value(),
+                searchHistory: [],
                 onSearch: false
-            }
-        },
-        watch: {
-            searchHistory: function() {
-                this.$db.set("searchHistory", this.searchHistory).write();
             }
         },
         computed: {
@@ -103,15 +98,72 @@
             searchBook() {
                 if (this.searchKey == "") return;
                 this.searchHistory.push(this.searchKey);
+                var name = this.searchKey;
+                var dbRequest = window.indexedDB.open("data");
+                dbRequest.onsuccess = function(event) {
+                    var db = event.target.result;
+                    var store = db.transaction("searchHistory", 'readwrite').objectStore("searchHistory");
+                    console.log(name);
+                    store.add(name);
+                }
                 this.searchKey = "";
             },
             deleteAllSearchHistory() {
                 this.searchHistory = [];
+                var dbRequest = window.indexedDB.open("data");
+                dbRequest.onsuccess = function(event) {
+                    var db = event.target.result;
+                    var store = db.transaction("searchHistory", 'readwrite').objectStore("searchHistory");
+                    store.clear();
+                }
             },
             deleteSearchHistory(index) {
+                var name = this.searchHistory[index];
                 this.searchHistory.splice(index, 1);
+                var dbRequest = window.indexedDB.open("data");
+                dbRequest.onsuccess = function(event) {
+                    var db = event.target.result;
+                    var store = db.transaction("searchHistory", 'readwrite').objectStore("searchHistory");
+                    store.openCursor().onsuccess = function(event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            if (cursor.value == name) {
+                                cursor.delete();
+                                return;
+                            }
+                            cursor.continue();
+                        }
+                    }
+                }
             }
-        }
+        },
+        created: function() {
+            var dbRequest = window.indexedDB.open("data");
+            var that = this;
+            dbRequest.onsuccess = function(event) {
+                var db = event.target.result;
+                var store = db.transaction("searchHistory", 'readwrite').objectStore("searchHistory");
+                store.openCursor().onsuccess = function(event) {
+                    var cursor = event.target.result;
+                    if (cursor) {
+                        that.searchHistory.push(cursor.value);
+                        cursor.continue();
+                    }
+                }
+            }
+            dbRequest.onupgradeneeded = function(event) {
+                var db = event.target.result;
+                var store;
+                if (!db.objectStoreNames.contains("searchHistory")) {
+                    store = db.createObjectStore("searchHistory", {
+                        autoIncrement: true
+                    });
+                    store.createIndex("name", "name", {
+                        unique: true
+                    });
+                }
+            }
+        },
     }
 </script>
 
