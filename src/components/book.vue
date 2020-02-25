@@ -118,6 +118,6 @@
     }
     .button-fade-enter,.button-fade-leave-to{
         opacity: 0;
-        transform: translateY(30px);
+        /* transform: translateY(30px); */
     }
 </style>

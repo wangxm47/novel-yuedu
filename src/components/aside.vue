@@ -2,46 +2,57 @@
     <div class='wrapper'>
         <h1>阅读</h1>
         <h3>读万卷书,行万里路</h3>
-        <div class='search' v-clickoutside="closeHandle">
+        <div class='search' v-clickoutside="closeHandle" clickoutside="false">
             <span class="icon line"></span>
             <input placeholder="搜索书籍" v-model="searchKey" class='input line' type="text" autocomplete="off"
                 @keydown.enter="searchBook()" @focus="onSearch=true">
-            <div class="search-history" v-if="onSearch&&searchHistory.length!=0">
-                <div class="name">搜索历史</div>
-                <button class="searchDelBtn" @click="deleteAllSearchHistory">全部删除</button>
-                <div class="record" v-for="(record,index) in searchHistory" v-bind:key="index">
-                    <div class="record-svg">
-                        <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27">
-                            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
-                        </svg>
-                    </div>
-                    <span>{{record}}</span>
-                    <div class="record-cancle-svg" @click="deleteSearchHistory(index)">
-                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 24 24"
-                            style=" fill:#000000;">
-                            <path d="M 4.9902344 3.9902344 A 1.0001 1.0001 0 0 0 4.2929688 5.7070312 L 10.585938 12 L 4.2929688 18.292969 A 1.0001 1.0001 0 1 0 5.7070312 19.707031 L 12 13.414062 L 18.292969 19.707031 A 1.0001 1.0001 0 1 0 19.707031 18.292969 L 13.414062 12 L 19.707031 5.7070312 A 1.0001 1.0001 0 0 0 18.980469 3.9902344 A 1.0001 1.0001 0 0 0 18.292969 4.2929688 L 12 10.585938 L 5.7070312 4.2929688 A 1.0001 1.0001 0 0 0 4.9902344 3.9902344 z"></path>
-                        </svg>
-                    </div>
+        </div>
+        <transition name="wrapper-fade" mode="out-in">
+            <div v-if="onSearch" key="search-wrapper">
+                <div class="search-history-wrapper" v-if="onSearch" v-clickoutside="closeHandle" clickoutside="false">
+                    <h4>搜索历史</h4>
+                    <h4 class="searchDelBtn" v-if="searchHistory.length!=0" @click="deleteAllSearchHistory">全部删除</h4>
+                    <transition name="search-history-fade" mode="out-in">
+                        <div v-if="searchHistory.length==0" class="search-history" key="nohistory">尚无搜索历史</div>
+                        <transition-group v-else name="record-list" tag="div" key="hashistory">
+                            <div class="record" v-for="(record,index) in searchHistory" v-bind:key="record">
+                                <div class="record-svg">
+                                    <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27">
+                                        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                                    </svg>
+                                </div>
+                                <span>{{record}}</span>
+                                <div class="record-cancle-svg" @click="deleteSearchHistory(index)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20"
+                                        viewBox="0 0 24 24" style=" fill:#000000;">
+                                        <path d="M 4.9902344 3.9902344 A 1.0001 1.0001 0 0 0 4.2929688 5.7070312 L 10.585938 12 L 4.2929688 18.292969 A 1.0001 1.0001 0 1 0 5.7070312 19.707031 L 12 13.414062 L 18.292969 19.707031 A 1.0001 1.0001 0 1 0 19.707031 18.292969 L 13.414062 12 L 19.707031 5.7070312 A 1.0001 1.0001 0 0 0 18.980469 3.9902344 A 1.0001 1.0001 0 0 0 18.292969 4.2929688 L 12 10.585938 L 5.7070312 4.2929688 A 1.0001 1.0001 0 0 0 4.9902344 3.9902344 z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </transition-group>
+                    </transition>
                 </div>
             </div>
-        </div>
-        <div class='history-wrapper'>
-            <h4>最近阅读</h4>
-            <div class="history">{{name}}</div>
-        </div>
-        <div class='setting-wrapper'>
-            <h4>基本设定</h4>
-            <div class="setting" @click="editBook">
-                编辑书籍
-                <transition name="button-fade">
-                    <button v-if="edit" class="btn btn-primary btn-xs" @click.stop="cancelEdit">取消</button>
-                </transition>
-                <transition name="button-fade">
-                    <button v-if="edit" class="btn btn-danger btn-xs">全部删除</button>
-                </transition>
+            <div v-else key="history-setting-wrapper">
+                <div class='history-wrapper'>
+                    <h4>最近阅读</h4>
+                    <div class="history">{{name}}</div>
+                </div>
+                <div class='setting-wrapper'>
+                    <h4>基本设定</h4>
+                    <div class="setting" @click="editBook">
+                        编辑书籍
+                        <transition name="button-fade">
+                            <button v-if="edit" class="btn btn-primary btn-xs" @click.stop="cancelEdit">取消</button>
+                        </transition>
+                        <transition name="button-fade">
+                            <button v-if="edit" class="btn btn-danger btn-xs">全部删除</button>
+                        </transition>
+                    </div>
+                    <div class="setting" @click="changeMode">{{mode}}</div>
+                </div>
             </div>
-            <div class="setting" @click="changeMode">{{mode}}</div>
-        </div>
+        </transition>
     </div>
 </template>
 
@@ -59,7 +70,7 @@
                 bookName: this.latestBook,
                 searchKey: "",
                 searchHistory: [],
-                onSearch: false
+                onSearch: true
             }
         },
         computed: {
@@ -97,14 +108,15 @@
             },
             searchBook() {
                 if (this.searchKey == "") return;
-                this.searchHistory.push(this.searchKey);
-                var name = this.searchKey;
-                var dbRequest = window.indexedDB.open("data");
-                dbRequest.onsuccess = function(event) {
-                    var db = event.target.result;
-                    var store = db.transaction("searchHistory", 'readwrite').objectStore("searchHistory");
-                    console.log(name);
-                    store.add(name);
+                if (!this.searchHistory.includes(this.searchKey)) {
+                    this.searchHistory.push(this.searchKey);
+                    var name = this.searchKey;
+                    var dbRequest = window.indexedDB.open("data");
+                    dbRequest.onsuccess = function(event) {
+                        var db = event.target.result;
+                        var store = db.transaction("searchHistory", 'readwrite').objectStore("searchHistory");
+                        store.add(name);
+                    }
                 }
                 this.searchKey = "";
             },
@@ -195,53 +207,49 @@
         padding: 0 20px;
     }
 
-    .search-history {
-        background-color: #eeeeee;
-        border-radius: 10px;
-        width: 70%;
-        margin-top: 5px;
-        position: absolute;
-        left: 15%;
-        overflow: hidden;
-        box-shadow: 0 1px 6px rgba(0, 0, 0, 1);
-    }
-
-    .search-history .name {
-        width: 50%;
-        font-weight: 700;
-        text-align: center;
+    .search-history-wrapper h4 {
         display: inline-block;
     }
 
-    .search-history .searchDelBtn {
-        border: none;
-        padding: 0;
-        width: 50%;
-        outline: none;
-        font-weight: 700;
-        text-align: center;
+    .searchDelBtn {
         display: inline-block;
-        background-color: #eeeeee;
-    }
-
-    .search-history .searchDelBtn:active {
-        background-color: #c1c1c1;
+        margin-left: 40%;
     }
 
     .record {
         text-align: left;
-        padding-left: 18px;
+        padding-left: 0;
         margin: 10px 0;
         font-weight: 600;
         display: flex;
+        cursor: pointer;
+        user-select: none;
+        transition: all .5s;
+    }
+
+    .record-list-enter,
+    .record-list-leave-to {
+        opacity: 0;
+        transform: translateX(300px);
+    }
+
+    .record-list-leave-active {
+        position: absolute;
+        /* 
+        用splice删除数组的元素，由于删除的元素经理了一个过渡，始终占据文档流的这个位置，
+        因此下一个元素要等待其过渡消失后再移动过来，造成一个生硬的效果。要达到平滑过渡，
+        就要在删除元素leave-active阶段用position:absolute将其移出文档流，后面的元素才
+        能同时平滑过渡过来
+        */
     }
 
     .record span {
         flex: 1;
+        padding-left: 10px;
     }
 
     .record:hover {
-        background-color: #c1c1c1;
+        background-color: #e1e0e0;
     }
 
     .record-svg {
@@ -257,31 +265,55 @@
         width: 20px;
         display: inline-block;
         vertical-align: middle;
-        margin-right: 10px;
+        margin-right: 3px;
     }
 
-    .history-wrapper {
+    .history-wrapper,
+    .search-history-wrapper {
         margin-top: 40px;
         width: 100%;
         padding: 15px 15px;
         text-align: left;
         border-top: 1px #e3e3e3 solid;
-        border-bottom: 1px #e3e3e3 solid;
     }
 
     .setting-wrapper {
         width: 100%;
         text-align: left;
         padding: 15px 15px;
+        border-top: 1px #e3e3e3 solid;
+    }
+
+    .wrapper-fade-enter-active,
+    .wrapper-fade-leave-active {
+        transition: all .2s;
+    }
+
+    .wrapper-fade-enter,
+    .wrapper-fade-leave-to {
+        opacity: 0;
+        /* transform: translateX(30px); */
     }
 
     .history,
+    .search-history,
     .setting {
         padding: 8px 25px;
         font-weight: 800;
         font-size: 14px;
         cursor: pointer;
         user-select: none;
+    }
+
+    .search-history-fade-enter-active,
+    .search-history-fade-leave-active {
+        transition: all .4s;
+    }
+
+    .search-history-fade-enter,
+    .search-history-fade-leave-to {
+        opacity: 0;
+        transform: translateX(-300px);
     }
 
     .setting button {
@@ -302,11 +334,11 @@
     .button-fade-enter,
     .button-fade-leave-to {
         opacity: 0;
-        transform: translateX(30px);
+        /* transform: translateX(30px); */
     }
 
     .history:hover,
-    .setting:hover {
+    .search-history .setting:hover {
         background-color: #e1e0e0;
     }
 

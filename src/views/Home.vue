@@ -4,30 +4,19 @@
             <Aside />
         </div>
         <div class="books wrapper-padding" @scroll="scrollBook">
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
+            
         </div>
     </div>
 </template>
 
 <script>
     // @ is an alias to /src
-    import Book from '@/components/Book.vue'
+    // import Book from '@/components/Book.vue'
     import Aside from '@/components/aside.vue'
     export default {
         name: 'home',
         components: {
-            Book,
+            // Book,
             Aside
         },
         methods: {
