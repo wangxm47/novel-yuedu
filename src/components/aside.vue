@@ -9,7 +9,7 @@
         </div>
         <transition name="wrapper-fade" mode="out-in">
             <div v-if="onSearch" key="search-wrapper">
-                <div class="search-history-wrapper" v-if="onSearch" v-clickoutside="closeHandle" clickoutside="false">
+                <div class="search-history-wrapper" v-clickoutside="closeHandle" clickoutside="false">
                     <h4>搜索历史</h4>
                     <h4 class="searchDelBtn" v-if="searchHistory.length!=0" @click="deleteAllSearchHistory">全部删除</h4>
                     <transition name="search-history-fade" mode="out-in">
@@ -70,7 +70,7 @@
                 bookName: this.latestBook,
                 searchKey: "",
                 searchHistory: [],
-                onSearch: true
+                onSearch: false
             }
         },
         computed: {
