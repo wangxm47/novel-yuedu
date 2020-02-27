@@ -4,27 +4,35 @@
             <Aside />
         </div>
         <div class="books wrapper-padding" @scroll="scrollBook">
-            
+            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+                readChapter="100" />
+            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+                readChapter="100" />
+            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
+                readChapter="100" />
+            <Loading size="large"></Loading>
         </div>
     </div>
 </template>
 
 <script>
     // @ is an alias to /src
-    // import Book from '@/components/Book.vue'
+    import Book from '@/components/Book.vue'
     import Aside from '@/components/aside.vue'
+    import Loading from '@/components/loading.vue'
     export default {
         name: 'home',
         components: {
-            // Book,
-            Aside
+            Book,
+            Aside,
+            Loading
         },
         methods: {
             scrollBook(event) {
                 var scrollHeight = event.target.scrollHeight;
                 var scrollTop = event.target.scrollTop;
                 var clientHeight = event.target.clientHeight;
-                if(scrollHeight-scrollTop-clientHeight < 1){
+                if (scrollHeight - scrollTop - clientHeight < 1) {
                     console.log("滚到底了");
                 }
             }
