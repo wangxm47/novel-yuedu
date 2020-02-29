@@ -108,6 +108,7 @@
             },
             searchBook() {
                 if (this.searchKey == "") return;
+                this.$emit("searching");
                 if (!this.searchHistory.includes(this.searchKey)) {
                     this.searchHistory.push(this.searchKey);
                     var name = this.searchKey;

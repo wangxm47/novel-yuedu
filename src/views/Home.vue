@@ -1,17 +1,17 @@
 <template>
     <div class="home">
         <div class='aside wrapper-padding'>
-            <Aside />
+            <Aside @searching="onSearching" />
         </div>
-        <div class="books wrapper-padding" @scroll="scrollBook">
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
-            <Book bookName="遮天" bookImageSrc="https://img.zhaishuyuan.com/bookpic/s204.jpg" bookResource="https://www.zhaishuyuan.com/book/204"
-                readChapter="100" />
-            <Loading size="large"></Loading>
-        </div>
+        <transition name="boos-fade" mode="out-in">
+            <div class="books wrapper-padding" @scroll="scrollBook" v-if="search" key="books">
+                <Book v-for="(book,index) in books" :bookName="book.name" :bookImageSrc="book.imgsrc" :bookResource="book.booksrc"
+                    :readChapter="chap" :key="index" />
+            </div>
+            <div class="books wrapper-padding" @scroll="scrollBook" v-else key = "searchbooks">
+                <Loading size="large"></Loading>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -27,6 +27,42 @@
             Aside,
             Loading
         },
+        data() {
+            return {
+                search: true,
+                books: [{
+                        name: "遮天",
+                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
+                        booksrc: "https://www.zhaishuyuan.com/book/204",
+                        chap: "100"
+                    },
+                    {
+                        name: "遮天",
+                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
+                        booksrc: "https://www.zhaishuyuan.com/book/204",
+                        chap: "100"
+                    },
+                    {
+                        name: "遮天",
+                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
+                        booksrc: "https://www.zhaishuyuan.com/book/204",
+                        chap: "100"
+                    },
+                    {
+                        name: "遮天",
+                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
+                        booksrc: "https://www.zhaishuyuan.com/book/204",
+                        chap: "100"
+                    },
+                    {
+                        name: "遮天",
+                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
+                        booksrc: "https://www.zhaishuyuan.com/book/204",
+                        chap: "100"
+                    }
+                ]
+            }
+        },
         methods: {
             scrollBook(event) {
                 var scrollHeight = event.target.scrollHeight;
@@ -35,6 +71,9 @@
                 if (scrollHeight - scrollTop - clientHeight < 1) {
                     console.log("滚到底了");
                 }
+            },
+            onSearching(){
+                this.search = false;
             }
         }
     }
