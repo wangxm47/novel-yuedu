@@ -6,7 +6,7 @@
         <transition name="boos-fade" mode="out-in">
             <div class="books wrapper-padding" @scroll="scrollBook" v-if="search" key="books">
                 <Book v-for="(book,index) in books" :bookName="book.name" :bookImageSrc="book.imgsrc" :bookResource="book.booksrc"
-                    :readChapter="chap" :key="index" />
+                    :readChapter="book.chap" :key="index" />
             </div>
             <div class="books wrapper-padding" @scroll="scrollBook" v-else key = "searchbooks">
                 <Loading size="large"></Loading>

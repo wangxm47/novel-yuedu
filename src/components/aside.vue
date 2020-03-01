@@ -109,6 +109,13 @@
             searchBook() {
                 if (this.searchKey == "") return;
                 this.$emit("searching");
+                this.$http.get("https://www.ymxxs.com/search.htm", {
+                    params: {
+                        keyword: this.searchKey
+                    }
+                }).then(()=> {
+                    
+                })
                 if (!this.searchHistory.includes(this.searchKey)) {
                     this.searchHistory.push(this.searchKey);
                     var name = this.searchKey;
