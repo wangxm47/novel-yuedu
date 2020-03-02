@@ -2,14 +2,18 @@
     <div class='wrapper'>
         <h1>阅读</h1>
         <h3>读万卷书,行万里路</h3>
-        <div class='search' v-clickoutside="closeHandle" clickoutside="false">
+        <div class='search'>
             <span class="icon line"></span>
             <input placeholder="搜索书籍" v-model="searchKey" class='input line' type="text" autocomplete="off"
-                @keydown.enter="searchBook()" @focus="onSearch=true">
+                @keydown.enter="searchBook()" @focus="onSearchHandle">
         </div>
         <transition name="wrapper-fade" mode="out-in">
             <div v-if="onSearch" key="search-wrapper">
-                <div class="search-history-wrapper" v-clickoutside="closeHandle" clickoutside="false">
+                <div class='return-bookstore-wrapper'>
+                    <h4>返回入口</h4>
+                    <div class="return-bookstore" @click="returnBookStore">返回书架</div>
+                </div>
+                <div class="search-history-wrapper">
                     <h4>搜索历史</h4>
                     <h4 class="searchDelBtn" v-if="searchHistory.length!=0" @click="deleteAllSearchHistory">全部删除</h4>
                     <transition name="search-history-fade" mode="out-in">
@@ -36,7 +40,7 @@
             <div v-else key="history-setting-wrapper">
                 <div class='history-wrapper'>
                     <h4>最近阅读</h4>
-                    <div class="history">{{name}}</div>
+                    <div :class="{'no-history':!noHistory,history:noHistory}">{{name}}</div>
                 </div>
                 <div class='setting-wrapper'>
                     <h4>基本设定</h4>
@@ -82,6 +86,12 @@
                 }
 
             },
+            noHistory(){
+                if (this.bookName == '') {
+                    return false;
+                }
+                return true;
+            },
             mode() {
                 if (this.$store.state.mode == "sun") {
                     return "夜间模式";
@@ -94,8 +104,13 @@
             }
         },
         methods: {
-            closeHandle() {
+            onSearchHandle() {
+                this.onSearch = true;
+                this.$emit("beforesearch");
+            },
+            returnBookStore(){
                 this.onSearch = false;
+                this.$emit("noSearch");
             },
             changeMode() {
                 this.$store.commit('changeMode');
@@ -113,8 +128,8 @@
                     params: {
                         keyword: this.searchKey
                     }
-                }).then(()=> {
-                    
+                }).then(() => {
+
                 })
                 if (!this.searchHistory.includes(this.searchKey)) {
                     this.searchHistory.push(this.searchKey);
@@ -277,7 +292,7 @@
     }
 
     .history-wrapper,
-    .search-history-wrapper {
+    .return-bookstore-wrapper {
         margin-top: 40px;
         width: 100%;
         padding: 15px 15px;
@@ -285,7 +300,8 @@
         border-top: 1px #e3e3e3 solid;
     }
 
-    .setting-wrapper {
+    .setting-wrapper,
+    .search-history-wrapper {
         width: 100%;
         text-align: left;
         padding: 15px 15px;
@@ -304,13 +320,21 @@
     }
 
     .history,
+    .no-history,
     .search-history,
-    .setting {
+    .setting,
+    .return-bookstore {
         padding: 8px 25px;
         font-weight: 800;
         font-size: 14px;
         cursor: pointer;
         user-select: none;
+    }
+
+    .history:hover,
+    .setting:hover,
+    .return-bookstore:hover {
+        background-color: #e1e0e0;
     }
 
     .search-history-fade-enter-active,
@@ -343,11 +367,6 @@
     .button-fade-leave-to {
         opacity: 0;
         /* transform: translateX(30px); */
-    }
-
-    .history:hover,
-    .search-history .setting:hover {
-        background-color: #e1e0e0;
     }
 
     .input {

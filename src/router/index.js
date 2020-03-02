@@ -11,7 +11,7 @@ const routes = [{
 	},
 	{
 		path: '*',
-		redirect: '/index',
+		redirect: '/',
 	}
 ]
 
