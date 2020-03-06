@@ -18,8 +18,8 @@
                     <h4 class="searchDelBtn" v-if="searchHistory.length!=0" @click="deleteAllSearchHistory">全部删除</h4>
                     <transition name="search-history-fade" mode="out-in">
                         <div v-if="searchHistory.length==0" class="search-history" key="nohistory">尚无搜索历史</div>
-                        <transition-group v-else name="record-list" tag="div" key="hashistory">
-                            <div class="record" v-for="(record,index) in searchHistory" v-bind:key="record">
+                        <transition-group v-else class="record-wrapper" name="record-list" tag="div" key="hashistory">
+                            <div class="record" @click="searchRecord(record)" v-for="(record,index) in searchHistory" v-bind:key="record">
                                 <div class="record-svg">
                                     <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27">
                                         <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
@@ -123,14 +123,7 @@
             },
             searchBook() {
                 if (this.searchKey == "") return;
-                this.$emit("searching");
-                this.$http.get("https://www.ymxxs.com/search.htm", {
-                    params: {
-                        keyword: this.searchKey
-                    }
-                }).then(() => {
-
-                })
+                this.$emit("searching",this.searchKey);
                 if (!this.searchHistory.includes(this.searchKey)) {
                     this.searchHistory.push(this.searchKey);
                     var name = this.searchKey;
@@ -153,6 +146,7 @@
                 }
             },
             deleteSearchHistory(index) {
+                event.stopPropagation();
                 var name = this.searchHistory[index];
                 this.searchHistory.splice(index, 1);
                 var dbRequest = window.indexedDB.open("data");
@@ -170,6 +164,10 @@
                         }
                     }
                 }
+            },
+            searchRecord(record){
+                this.searchKey = record;
+                this.$emit("searching",this.searchKey);
             }
         },
         created: function() {
@@ -248,6 +246,16 @@
         cursor: pointer;
         user-select: none;
         transition: all .5s;
+    }
+    
+    .record-wrapper{
+        display: block;
+        overflow: auto;
+        height: 400px;
+    }
+    
+    .record-wrapper::-webkit-scrollbar {
+        display: none;
     }
 
     .record-list-enter,

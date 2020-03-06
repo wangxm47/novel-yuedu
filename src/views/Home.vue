@@ -4,15 +4,16 @@
             <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle" />
         </div>
         <transition name="books-fade" mode="out-in">
-            <div id="booksWrapper" class="books wrapper-padding" @scroll="scrollBook" v-if="searchState=='nosearch'"
-                key="books">
-                <Book v-for="(book,index) in books" :bookName="book.name" :bookImageSrc="book.imgsrc" :bookResource="book.booksrc"
-                    :readChapter="book.chap" :key="index" />
+            <div class="books wrapper-padding" @scroll="scrollBook" v-if="searchState=='nosearch'" key="books">
+                <transition-group name="book-list" tag="div">
+                    <Book v-for="(book) in books" :bookName="book.name" :bookResource="book.booksrc"
+                        :read="book.chap" :key="book.id" :search="false"/>
+                </transition-group>
             </div>
-            <div class="loading wrapper-padding" @scroll="scrollBook" v-else-if="searchState=='searching'" key="searchbooks">
+            <div class="loading wrapper-padding" v-else-if="searchState=='searching'" key="searchbooks">
                 <Loading size="large"></Loading>
             </div>
-            <div class="wait-loading wrapper-padding">
+            <div v-else class="wait-loading wrapper-padding">
                 <div class="wait-loading-text">
                     等待搜索
                     <div class="dot"></div>
@@ -39,37 +40,8 @@
         data() {
             return {
                 searchState: "nosearch",
-                books: [{
-                        name: "遮天",
-                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
-                        booksrc: "https://www.zhaishuyuan.com/book/204",
-                        chap: "100"
-                    },
-                    {
-                        name: "遮天",
-                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
-                        booksrc: "https://www.zhaishuyuan.com/book/204",
-                        chap: "100"
-                    },
-                    {
-                        name: "遮天",
-                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
-                        booksrc: "https://www.zhaishuyuan.com/book/204",
-                        chap: "100"
-                    },
-                    {
-                        name: "遮天",
-                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
-                        booksrc: "https://www.zhaishuyuan.com/book/204",
-                        chap: "100"
-                    },
-                    {
-                        name: "遮天",
-                        imgsrc: "https://img.zhaishuyuan.com/bookpic/s204.jpg",
-                        booksrc: "https://www.zhaishuyuan.com/book/204",
-                        chap: "100"
-                    }
-                ]
+                books: [],
+                searchResult: []
             }
         },
         methods: {
@@ -84,8 +56,24 @@
             beforesearchHandle() {
                 this.searchState = "beforesearch";
             },
-            onSearching() {
+            onSearching(searchKey) {
                 this.searchState = "searching";
+                this.$http.get("https://www.ymxxs.com/search.htm",{
+                    params:{
+                        keyword: searchKey
+                    }
+                }).then((res)=>{
+                    var parser = new DOMParser();
+                    var doc=parser.parseFromString(res.data, "text/html");
+                    var result =Array.from(doc.getElementsByClassName('n2')).slice(1);
+                    result.forEach(e => {
+                        var obj = {};
+                        obj["name"] = e.innerText;
+                        obj["booksrc"] = e.firstElementChild.href;
+                        this.searchResult.push(obj);
+                    })
+                    
+                })
             },
             noSearchHandle() {
                 this.searchState = "nosearch";
@@ -119,6 +107,26 @@
         display: block;
         overflow: auto;
         outline: none;
+    }
+
+    .books {
+        transition: all .5s;
+    }
+
+    .book-list-enter,
+    .book-list-leave-to {
+        opacity: 0;
+        transform: translateY(100px);
+    }
+
+    .book-list-leave-active {
+        position: absolute;
+        /* 
+        用splice删除数组的元素，由于删除的元素经理了一个过渡，始终占据文档流的这个位置，
+        因此下一个元素要等待其过渡消失后再移动过来，造成一个生硬的效果。要达到平滑过渡，
+        就要在删除元素leave-active阶段用position:absolute将其移出文档流，后面的元素才
+        能同时平滑过渡过来
+        */
     }
 
     .books::-webkit-scrollbar {

@@ -7,13 +7,17 @@
             <div class="media-body bookBody">
                 <h3 class="media-heading title">{{bookName}}</h3>
                 <h5 class="media-heading author">作者:{{author}}</h5>
-                <h5 class="media-heading author">上次阅读:{{lastreadChapter}}</h5>
-                <h5 class="media-heading author">未阅读:{{unreadChapter}}章</h5>
+                <h5 class="media-heading author" v-if="!search">上次阅读:{{lastreadChapter}}</h5>
+                <h5 class="media-heading author" v-if="!search">未阅读:{{unreadChapter}}章</h5>
+                <h5 class="media-heading author">最新:{{latest}}</h5>
                 <div class="intro">冰冷与黑暗并存的宇宙深处，九具庞大的龙尸拉着一口青铜古棺，亘古长存。这是太空探测器在枯寂的宇宙中捕捉到的一幅极其震撼的画面。九龙拉棺，究竟是回到了上古，还是来到了星空的彼岸？一个浩大的仙侠世界，光怪陆离，神秘无尽。热血似火山沸腾，激情若瀚海汹涌，欲望如深渊无止境……登天路，踏歌行，弹指遮天。......</div>
             </div>
         </div>
         <transition name="button-fade">
             <button v-if="edit" class="btn btn-danger btn-xs editButton">删除</button>    
+        </transition>
+        <transition name="button-fade">
+            <button v-if="search" class="btn btn-success btn-xs editButton">添加到书架</button>    
         </transition>
     </div>
 </template>
@@ -26,24 +30,26 @@
                 type: String,
                 required: true
             },
-            bookImageSrc: {
-                type: String,
-                required: true
-            },
             bookResource: {
                 type: String,
                 required: true
             },
-            readChapter: {
+            read: {
                 type: String,
                 required: true
             },
+            search: {
+                type: Boolean,
+                required: true
+            }
         },
         data: function() {
             return {
-                unreadChapter: 1000,
-                author: "辰东",
-                lastreadChapter: "第一百章 满地找牙",
+                unreadChapter: 0,
+                author: "",
+                lastreadChapter: "",
+                bookImageSrc:"",
+                latest:""
             }
         },
         methods:{
