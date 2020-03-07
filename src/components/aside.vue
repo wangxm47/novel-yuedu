@@ -110,6 +110,7 @@
             },
             returnBookStore(){
                 this.onSearch = false;
+                this.searchKey = "";
                 this.$emit("noSearch");
             },
             changeMode() {

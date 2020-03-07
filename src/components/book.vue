@@ -35,7 +35,7 @@
                 required: true
             },
             read: {
-                type: String,
+                type: Number,
                 required: true
             },
             search: {

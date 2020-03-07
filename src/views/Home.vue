@@ -4,16 +4,32 @@
             <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle" />
         </div>
         <transition name="books-fade" mode="out-in">
-            <div class="books wrapper-padding" @scroll="scrollBook" v-if="searchState=='nosearch'" key="books">
+            <div class="books wrapper-padding" v-if="searchState=='nosearch'" key="books">
                 <transition-group name="book-list" tag="div">
-                    <Book v-for="(book) in books" :bookName="book.name" :bookResource="book.booksrc"
-                        :read="book.chap" :key="book.id" :search="false"/>
+                    <Book v-for="(book) in books" :bookName="book.name" :bookResource="book.booksrc" :read="book.read"
+                        :key="book.id" :search="false" />
                 </transition-group>
             </div>
-            <div class="loading wrapper-padding" v-else-if="searchState=='searching'" key="searchbooks">
+            <div class="books wrapper-padding" v-else-if="searchState=='searchend'" key="result">
+                <transition-group name="book-list" tag="div">
+                    <Book v-for="(book) in searchResult" :bookName="book.name" :bookResource="book.booksrc" :read="book.read"
+                        :key="book.id" :search="false" />
+                </transition-group>
+            </div>
+            <div class="loading wrapper-padding" v-else-if="searchState=='searching'" key="loading">
                 <Loading size="large"></Loading>
             </div>
-            <div v-else class="wait-loading wrapper-padding">
+            <div v-else-if="searchState=='searchfail'" class="wait-loading wrapper-padding" key="fail">
+                <div class="wait-loading-text">
+                    搜索失败
+                </div>
+            </div>
+            <div v-else-if="searchState=='searchnull'" class="wait-loading wrapper-padding" key="null">
+                <div class="wait-loading-text">
+                    搜索不到相关书籍
+                </div>
+            </div>
+            <div v-else class="wait-loading wrapper-padding" key="wait">
                 <div class="wait-loading-text">
                     等待搜索
                     <div class="dot"></div>
@@ -54,29 +70,75 @@
                 }
             },
             beforesearchHandle() {
-                this.searchState = "beforesearch";
+                if (this.searchState == "nosearch") {
+                    this.searchState = "beforesearch";
+                }
             },
             onSearching(searchKey) {
                 this.searchState = "searching";
-                this.$http.get("https://www.ymxxs.com/search.htm",{
-                    params:{
+                this.searchResult = [];
+                this.$http.get("https://www.ymxxs.com/search.htm", {
+                    params: {
                         keyword: searchKey
                     }
-                }).then((res)=>{
+                }).then((res) => {
                     var parser = new DOMParser();
-                    var doc=parser.parseFromString(res.data, "text/html");
-                    var result =Array.from(doc.getElementsByClassName('n2')).slice(1);
-                    result.forEach(e => {
-                        var obj = {};
-                        obj["name"] = e.innerText;
-                        obj["booksrc"] = e.firstElementChild.href;
-                        this.searchResult.push(obj);
+                    var doc = parser.parseFromString(res.data, "text/html");
+                    var page = Array.from(doc.getElementsByClassName('number')).slice(1, -1);
+                    var result = Array.from(doc.getElementsByClassName('n2')).slice(1);
+                    if (result.length == 0) return null;
+                    var get_arr = [];
+                    for (var i = 0; i < page.length; i++) {
+                        get_arr[i] = this.$http({
+                            method: "get",
+                            url: "https://www.ymxxs.com/search.htm",
+                            params: {
+                                keyword: searchKey,
+                                pn: page[i].innerText
+                            }
+                        });
+                    }
+                    this.$http.all(get_arr).then(arr => {
+                        arr.forEach(e => {
+                            result = result.concat(Array.from(parser.parseFromString(e.data,
+                                "text/html").getElementsByClassName('n2')).slice(1));
+                        })
+                        result = Array.from(new Set(result));
+                        result.forEach((e, index) => {
+                            var obj = {};
+                            obj["name"] = e.innerText;
+                            obj["booksrc"] = e.firstElementChild.href;
+                            obj["read"] = 0;
+                            obj["id"] = index;
+                            if(obj["name"] == searchKey){
+                                this.searchResult.unshift(obj);
+                            } else{
+                                this.searchResult.push(obj);
+                            }
+                        })
                     })
-                    
+                    return result;
+                }).then(result => {
+                    var that = this;
+                    if (result == null) {
+                        setTimeout(function() {
+                            that.searchState = "searchnull";
+                        }, 1500);
+                    } else {
+                        setTimeout(function() {
+                            that.searchState = "searchend";
+                        }, 1500);
+                    }
+                }).catch(() => {
+                    var that = this;
+                    setTimeout(function() {
+                        that.searchState = "searchfail";
+                    }, 1500);
                 })
             },
             noSearchHandle() {
                 this.searchState = "nosearch";
+                this.searchResult = [];
             }
         }
     }
