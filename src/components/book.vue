@@ -7,17 +7,17 @@
             <div class="media-body bookBody">
                 <h3 class="media-heading title">{{bookName}}</h3>
                 <h5 class="media-heading author">作者:{{author}}</h5>
-                <h5 class="media-heading author" v-if="!search">上次阅读:{{lastreadChapter}}</h5>
-                <h5 class="media-heading author" v-if="!search">未阅读:{{unreadChapter}}章</h5>
+                <h5 class="media-heading author" v-if="!searchState">上次阅读:{{lastreadChapter}}</h5>
+                <h5 class="media-heading author" v-if="!searchState">未阅读:{{unreadChapter}}章</h5>
                 <h5 class="media-heading author">最新:{{latest}}</h5>
-                <div class="intro">冰冷与黑暗并存的宇宙深处，九具庞大的龙尸拉着一口青铜古棺，亘古长存。这是太空探测器在枯寂的宇宙中捕捉到的一幅极其震撼的画面。九龙拉棺，究竟是回到了上古，还是来到了星空的彼岸？一个浩大的仙侠世界，光怪陆离，神秘无尽。热血似火山沸腾，激情若瀚海汹涌，欲望如深渊无止境……登天路，踏歌行，弹指遮天。......</div>
+                <div class="intro">{{introduction}}</div>
             </div>
         </div>
         <transition name="button-fade">
-            <button v-if="edit" class="btn btn-danger btn-xs editButton">删除</button>    
+            <button v-if="edit" class="btn btn-danger btn-xs editButton" @click="deleteBook">删除</button>    
         </transition>
         <transition name="button-fade">
-            <button v-if="search" class="btn btn-success btn-xs editButton">添加到书架</button>    
+            <button v-if="searchState" class="btn btn-success btn-xs editButton" @click="addBook">添加到书架</button>    
         </transition>
     </div>
 </template>
@@ -26,11 +26,15 @@
     export default {
         name: 'Book',
         props: {
+            bookId: {
+                type: Number,
+                required: true
+            },
             bookName: {
                 type: String,
                 required: true
             },
-            bookResource: {
+            bookSrc: {
                 type: String,
                 required: true
             },
@@ -49,19 +53,66 @@
                 author: "",
                 lastreadChapter: "",
                 bookImageSrc:"",
-                latest:""
+                latest:"",
+                introduction:"",
+                searchState: this.search
             }
         },
         methods:{
+            addBook(){
+                this.searchState = false;
+                this.$emit("addToStore");
+            },
+            deleteBook(){
+                this.$emit("deleteFromStore");
+            },
             clickRightMouse(e){
                 e.preventDefault();
+            },
+            parseBook(res){
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(res.data, "text/html");
+                var info = doc.getElementsByClassName("info")[0];
+                var cover = info.getElementsByClassName("cover")[0];
+                this.bookImageSrc = cover.getElementsByTagName("img")[0].src;
+                this.author = info.getElementsByClassName('detail')[0].getElementsByTagName('i')[0].innerText;
+                this.latest = info.getElementsByClassName('detail')[2].getElementsByTagName('i')[0].innerText;
+                var desc = info.getElementsByClassName('desc')[0].innerText;
+                this.introduction = desc.slice(desc.indexOf('介')+2).trim();
+                if(this.introduction.length==0) this.introduction = "尚无简介";
+                if(!this.search){
+                    var list_href = info.getElementsByClassName('btn-info')[0].href;
+                    this.$http.get(list_href).then(listRes => {
+                        var listHtml = parser.parseFromString(listRes.data,"text/html");
+                        var list = listHtml.getElementsByClassName('col3');
+                        this.unreadChapter = list.length - this.read;
+                        for(let i = 0; i < list.length; i++){
+                            if(list[i].innerText.slice(0,3)=="第一章"){
+                                this.lastreadChapter = list[i].innerText;
+                            }
+                        }
+                    })
+                }
             }
         },
         computed:{
             edit: function(){
+                if(this.search) return false;
                 return this.$store.state.edit;
             }
         },
+        beforeMount() {
+            this.$http.get(this.bookSrc).then(res => {
+                this.parseBook(res)
+            }).catch(()=>{
+                var that = this;
+                setTimeout(function(){
+                    that.$http.get(that.bookSrc).then(res => {
+                        that.parseBook(res)
+                    })
+                },2000)
+            })
+        }
     }
 </script>
 

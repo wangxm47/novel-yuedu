@@ -5,7 +5,7 @@
         <div class='search'>
             <span class="icon line"></span>
             <input placeholder="搜索书籍" v-model="searchKey" class='input line' type="text" autocomplete="off"
-                @keydown.enter="searchBook()" @focus="onSearchHandle">
+                @keydown.enter="searchBook()" @focus="onSearchHandle" autofocus="false">
         </div>
         <transition name="wrapper-fade" mode="out-in">
             <div v-if="onSearch" key="search-wrapper">

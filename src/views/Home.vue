@@ -1,20 +1,27 @@
 <template>
     <div class="home">
         <div class='aside wrapper-padding'>
-            <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle" />
+            <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle" autofocus="false"/>
         </div>
         <transition name="books-fade" mode="out-in">
             <div class="books wrapper-padding" v-if="searchState=='nosearch'" key="books">
                 <transition-group name="book-list" tag="div">
-                    <Book v-for="(book) in books" :bookName="book.name" :bookResource="book.booksrc" :read="book.read"
-                        :key="book.id" :search="false" />
+                    <Book v-for="(book,index) in books" :bookId= "book.id" :bookName="book.name" :bookSrc="book.booksrc" :read="book.read" :key="book.id"
+                        :search="false" @deleteFromStore="deleteFromStore(index)"/>
                 </transition-group>
             </div>
-            <div class="books wrapper-padding" v-else-if="searchState=='searchend'" key="result">
+            <div class="books wrapper-padding" @scroll="scrollBook" v-else-if="searchState=='searchend'" key="result">
                 <transition-group name="book-list" tag="div">
-                    <Book v-for="(book) in searchResult" :bookName="book.name" :bookResource="book.booksrc" :read="book.read"
-                        :key="book.id" :search="false" />
+                    <Book v-for="(book,index) in searchBooks" :bookId= "book.id" :bookName="book.name" :bookSrc="book.booksrc" :read="book.read"
+                        :key="book.id" :search="true" @addToStore="addToStore(index)"/>
                 </transition-group>
+                <div v-if="loadingNext" class="wait-loading wrapper-padding" key="wait">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
             </div>
             <div class="loading wrapper-padding" v-else-if="searchState=='searching'" key="loading">
                 <Loading size="large"></Loading>
@@ -57,16 +64,32 @@
             return {
                 searchState: "nosearch",
                 books: [],
-                searchResult: []
+                searchResult: [],
+                searchBooks: [],
+                timer: null,
+                loadingNext: false,
             }
         },
         methods: {
+            addToStore(index){
+                this.books.push(this.searchBooks[index]);
+            },
+            deleteFromStore(index){
+                this.books.splice(index,1);
+            },
             scrollBook(event) {
                 var scrollHeight = event.target.scrollHeight;
                 var scrollTop = event.target.scrollTop;
                 var clientHeight = event.target.clientHeight;
                 if (scrollHeight - scrollTop - clientHeight < 1) {
-                    console.log("滚到底了");
+                    this.loadingNext = true;
+                    var that = this;
+                    clearTimeout(this.timer);
+                    this.timer = setTimeout(function() {
+                        that.searchBooks.push(...that.searchResult.slice(0, 10));
+                        that.searchResult.splice(0, 10);
+                        that.loadingNext = false;
+                    }, 2000);
                 }
             },
             beforesearchHandle() {
@@ -77,6 +100,7 @@
             onSearching(searchKey) {
                 this.searchState = "searching";
                 this.searchResult = [];
+                this.searchBooks = [];
                 this.$http.get("https://www.ymxxs.com/search.htm", {
                     params: {
                         keyword: searchKey
@@ -110,9 +134,9 @@
                             obj["booksrc"] = e.firstElementChild.href;
                             obj["read"] = 0;
                             obj["id"] = index;
-                            if(obj["name"] == searchKey){
+                            if (obj["name"] == searchKey) {
                                 this.searchResult.unshift(obj);
-                            } else{
+                            } else {
                                 this.searchResult.push(obj);
                             }
                         })
@@ -126,6 +150,8 @@
                         }, 1500);
                     } else {
                         setTimeout(function() {
+                            that.searchBooks = that.searchBooks.concat(that.searchResult.slice(0, 10));
+                            that.searchResult.splice(0, 10);
                             that.searchState = "searchend";
                         }, 1500);
                     }
@@ -240,6 +266,14 @@
 
     .dot:nth-child(3) {
         animation-delay: -0.3s;
+    }
+
+    .dot:nth-child(4) {
+        animation-delay: -0.2s;
+    }
+
+    .dot:nth-child(5) {
+        animation-delay: -0.1s;
     }
 
     @keyframes dotjump {
