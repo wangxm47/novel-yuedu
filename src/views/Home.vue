@@ -1,7 +1,7 @@
 <template>
     <div class="home">
         <div class='aside wrapper-padding'>
-            <Aside autofocus="false" @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle"
+            <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle"
                 @deleteAllBook="deleteAllBook" />
         </div>
         <transition name="books-fade" mode="out-in">

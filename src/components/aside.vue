@@ -5,7 +5,7 @@
         <div class='search'>
             <span class="icon line"></span>
             <input placeholder="搜索书籍" v-model="searchKey" class='input line' type="text" autocomplete="off"
-                @keydown.enter="searchBook()" @focus="onSearchHandle" autofocus="false">
+                @keydown.enter="searchBook()" @focus="onSearchHandle">
         </div>
         <transition name="wrapper-fade" mode="out-in">
             <div v-if="onSearch" key="search-wrapper">
@@ -19,7 +19,8 @@
                     <transition name="search-history-fade" mode="out-in">
                         <div v-if="searchHistory.length==0" class="search-history" key="nohistory">尚无搜索历史</div>
                         <transition-group v-else class="record-wrapper" name="record-list" tag="div" key="hashistory">
-                            <div class="record" @click="searchRecord(record)" v-for="(record,index) in searchHistory" v-bind:key="record">
+                            <div class="record" @click="searchRecord(record)" v-for="(record,index) in searchHistory"
+                                v-bind:key="record">
                                 <div class="record-svg">
                                     <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27">
                                         <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
@@ -86,7 +87,7 @@
                 }
 
             },
-            noHistory(){
+            noHistory() {
                 if (this.bookName == '') {
                     return false;
                 }
@@ -108,7 +109,7 @@
                 this.onSearch = true;
                 this.$emit("beforesearch");
             },
-            returnBookStore(){
+            returnBookStore() {
                 this.onSearch = false;
                 this.searchKey = "";
                 this.$emit("noSearch");
@@ -122,12 +123,12 @@
             cancelEdit() {
                 this.$store.commit('cancelEdit');
             },
-            deleteAllBook(){
-                this.$emit("deleteAllBook");    
+            deleteAllBook() {
+                this.$emit("deleteAllBook");
             },
             searchBook() {
                 if (this.searchKey == "") return;
-                this.$emit("searching",this.searchKey);
+                this.$emit("searching", this.searchKey);
                 if (!this.searchHistory.includes(this.searchKey)) {
                     this.searchHistory.push(this.searchKey);
                     var name = this.searchKey;
@@ -169,9 +170,9 @@
                     }
                 }
             },
-            searchRecord(record){
+            searchRecord(record) {
                 this.searchKey = record;
-                this.$emit("searching",this.searchKey);
+                this.$emit("searching", this.searchKey);
             }
         },
         created: function() {
@@ -251,13 +252,13 @@
         user-select: none;
         transition: all .5s;
     }
-    
-    .record-wrapper{
+
+    .record-wrapper {
         display: block;
         overflow: auto;
         height: 400px;
     }
-    
+
     .record-wrapper::-webkit-scrollbar {
         display: none;
     }
