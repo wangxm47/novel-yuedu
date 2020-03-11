@@ -1,19 +1,20 @@
 <template>
     <div class="home">
         <div class='aside wrapper-padding'>
-            <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle" autofocus="false"/>
+            <Aside autofocus="false" @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle"
+                @deleteAllBook="deleteAllBook" />
         </div>
         <transition name="books-fade" mode="out-in">
             <div class="books wrapper-padding" v-if="searchState=='nosearch'" key="books">
                 <transition-group name="book-list" tag="div">
-                    <Book v-for="(book,index) in books" :bookId= "book.id" :bookName="book.name" :bookSrc="book.booksrc" :read="book.read" :key="book.id"
-                        :search="false" @deleteFromStore="deleteFromStore(index)"/>
+                    <Book class="book" v-for="(book,index) in books" :bookId="book.id" :bookName="book.name" :bookSrc="book.booksrc"
+                        :read="book.read" :key="book.id" :search="false" @deleteFromStore="deleteFromStore(index)" />
                 </transition-group>
             </div>
             <div class="books wrapper-padding" @scroll="scrollBook" v-else-if="searchState=='searchend'" key="result">
                 <transition-group name="book-list" tag="div">
-                    <Book v-for="(book,index) in searchBooks" :bookId= "book.id" :bookName="book.name" :bookSrc="book.booksrc" :read="book.read"
-                        :key="book.id" :search="true" @addToStore="addToStore(index)"/>
+                    <Book class="book" v-for="(book,index) in searchBooks" :bookId="book.id" :bookName="book.name"
+                        :bookSrc="book.booksrc" :read="book.read" :key="book.id" :search="true" @addToStore="addToStore(index)" />
                 </transition-group>
                 <div v-if="loadingNext" class="wait-loading wrapper-padding" key="wait">
                     <div class="dot"></div>
@@ -45,6 +46,10 @@
                 </div>
             </div>
         </transition>
+        <transition-group name="message-list" tag="div" class="message-wrapper">
+            <Message v-for="(msg,index) in messages" :type="msg.type" :message="msg.message" :delay="msg.delay" :key="msg.id"
+                @close="messageClose(index)"></Message>
+        </transition-group>
     </div>
 </template>
 
@@ -53,12 +58,14 @@
     import Book from '@/components/Book.vue'
     import Aside from '@/components/aside.vue'
     import Loading from '@/components/loading.vue'
+    import Message from '@/components/message.vue'
     export default {
         name: 'home',
         components: {
             Book,
             Aside,
-            Loading
+            Loading,
+            Message
         },
         data() {
             return {
@@ -68,14 +75,94 @@
                 searchBooks: [],
                 timer: null,
                 loadingNext: false,
+                messages: [],
+                msgNum: 0
             }
         },
         methods: {
-            addToStore(index){
-                this.books.push(this.searchBooks[index]);
+            messageClose(index) {
+                this.messages.splice(index, 1);
             },
-            deleteFromStore(index){
-                this.books.splice(index,1);
+            addToStore(index) {
+                var book = this.searchBooks[index]
+                for (var i = 0; i < this.books.length; i++) {
+                    if (this.books[i].booksrc == book.booksrc) {
+                        let msg = {
+                            type: "error",
+                            message: "书架中已包含本书"
+                        };
+                        msg["id"] = this.msgNum++;
+                        this.messages.push(msg);
+                        return;
+                    }
+                }
+                this.books.unshift(book);
+                var dbRequest = window.indexedDB.open("bookData");
+                dbRequest.onsuccess = function(event) {
+                    var db = event.target.result;
+                    var store = db.transaction("books", 'readwrite').objectStore("books");
+                    store.add(book);
+                }
+                var msg = {
+                    type: "success",
+                    message: "添加成功"
+                };
+                msg["id"] = this.msgNum++;
+                this.messages.push(msg);
+            },
+            deleteFromStore(index) {
+                var temp = this.books[index];
+                this.books.splice(index, 1);
+                if (this.books.length == 0) {
+                    this.$store.commit('cancelEdit');
+                }
+                var dbRequest = window.indexedDB.open("bookData");
+                dbRequest.onsuccess = function(event) {
+                    var db = event.target.result;
+                    var store = db.transaction("books", 'readwrite').objectStore("books");
+                    store.openCursor().onsuccess = function(event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            if (cursor.value.id == temp.id) {
+                                cursor.delete();
+                                return;
+                            }
+                            cursor.continue();
+                        }
+                    }
+                }
+                var msg = {
+                    type: "success",
+                    message: "删除成功"
+                };
+                msg["id"] = this.msgNum++;
+                this.messages.push(msg);
+            },
+            deleteAllBook() {
+                if (this.books.length == 0) {
+                    let msg = {
+                        type: "error",
+                        message: "书架为空"
+                    };
+                    msg["id"] = this.msgNum++;
+                    this.messages.push(msg);
+                    this.$store.commit('cancelEdit');
+                    return;
+                }
+                this.books = [];
+                this.$store.commit('cancelEdit');
+                var dbRequest = window.indexedDB.open("bookData");
+                dbRequest.onsuccess = function(event) {
+                    var db = event.target.result;
+                    var store = db.transaction("books", 'readwrite').objectStore("books");
+                    store.clear();
+                }
+                var msg = {
+                    type: "success",
+                    message: "删除成功"
+                };
+                msg["id"] = this.msgNum++;
+                this.messages.push(msg);
             },
             scrollBook(event) {
                 var scrollHeight = event.target.scrollHeight;
@@ -133,7 +220,7 @@
                             obj["name"] = e.innerText;
                             obj["booksrc"] = e.firstElementChild.href;
                             obj["read"] = 0;
-                            obj["id"] = index;
+                            obj["id"] = this.books.length + index;
                             if (obj["name"] == searchKey) {
                                 this.searchResult.unshift(obj);
                             } else {
@@ -166,19 +253,64 @@
                 this.searchState = "nosearch";
                 this.searchResult = [];
             }
+        },
+        created() {
+            var dbRequest = window.indexedDB.open("bookData");
+            var that = this;
+            dbRequest.onsuccess = function(event) {
+                var db = event.target.result;
+                var store = db.transaction("books", 'readwrite').objectStore("books");
+                store.openCursor().onsuccess = function(event) {
+                    var cursor = event.target.result;
+                    if (cursor) {
+                        that.books.push(cursor.value);
+                        cursor.continue();
+                    }
+                }
+            }
+            dbRequest.onupgradeneeded = function(event) {
+                var db = event.target.result;
+                var store;
+                if (!db.objectStoreNames.contains("books")) {
+                    store = db.createObjectStore("books", {
+                        autoIncrement: true
+                    });
+                    store.createIndex("book", "book", {
+                        unique: true
+                    });
+                }
+            }
         }
     }
 </script>
 <style scoped="scoped">
     .home {
         display: flex;
-        min-width: 800px;
+        min-width: 1095px;
         min-height: 500px;
         height: 100%;
     }
 
     .wrapper-padding {
         padding: 25px 20px;
+    }
+
+    .message-wrapper {
+        position: fixed;
+        left: 50%;
+        top: 4px;
+        transform: translateX(-50%);
+        width: 200px;
+    }
+
+    .message-list-enter,
+    .message-list-leave-to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    .message-list-leave-active {
+        position: absolute;
     }
 
     .aside {
@@ -197,14 +329,14 @@
         outline: none;
     }
 
-    .books {
+    .book {
         transition: all .5s;
     }
 
     .book-list-enter,
     .book-list-leave-to {
         opacity: 0;
-        transform: translateY(100px);
+        transform: translateY(-100px);
     }
 
     .book-list-leave-active {

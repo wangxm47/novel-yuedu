@@ -50,7 +50,7 @@
                             <button v-if="edit" class="btn btn-primary btn-xs" @click.stop="cancelEdit">取消</button>
                         </transition>
                         <transition name="button-fade">
-                            <button v-if="edit" class="btn btn-danger btn-xs">全部删除</button>
+                            <button v-if="edit" class="btn btn-danger btn-xs" @click.stop="deleteAllBook">全部删除</button>
                         </transition>
                     </div>
                     <div class="setting" @click="changeMode">{{mode}}</div>
@@ -121,6 +121,9 @@
             },
             cancelEdit() {
                 this.$store.commit('cancelEdit');
+            },
+            deleteAllBook(){
+                this.$emit("deleteAllBook");    
             },
             searchBook() {
                 if (this.searchKey == "") return;

@@ -17,7 +17,7 @@
             <button v-if="edit" class="btn btn-danger btn-xs editButton" @click="deleteBook">删除</button>    
         </transition>
         <transition name="button-fade">
-            <button v-if="searchState" class="btn btn-success btn-xs editButton" @click="addBook">添加到书架</button>    
+            <button v-if="add&&searchState" class="btn btn-success btn-xs editButton" @click="addBook">添加到书架</button>    
         </transition>
     </div>
 </template>
@@ -55,12 +55,13 @@
                 bookImageSrc:"",
                 latest:"",
                 introduction:"",
-                searchState: this.search
+                searchState: this.search,
+                add: true
             }
         },
         methods:{
             addBook(){
-                this.searchState = false;
+                this.add = false;
                 this.$emit("addToStore");
             },
             deleteBook(){

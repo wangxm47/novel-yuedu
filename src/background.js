@@ -31,7 +31,7 @@ function createWindow() {
     win = new BrowserWindow({
         width: 1400,
         height: 800,
-        minWidth: 1000,
+        minWidth: 1100,
         minHeight: 700,
         frame: true,
         titleBarStyle: 'hidden',
