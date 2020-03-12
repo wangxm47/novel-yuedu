@@ -2,7 +2,7 @@
     <div class='book' @contextmenu="clickRightMouse">
         <div class='media'>
             <div class="media-left">
-                <img class="media-object bookImage" :src="bookImageSrc" loading = "lazy" draggable="false"/>
+                <img class="media-object bookImage" :src="bookImageSrc" loading="lazy" draggable="false" />
             </div>
             <div class="media-body bookBody">
                 <h3 class="media-heading title">{{bookName}}</h3>
@@ -14,10 +14,10 @@
             </div>
         </div>
         <transition name="button-fade">
-            <button v-if="edit" class="btn btn-danger btn-xs editButton" @click="deleteBook">删除</button>    
+            <button v-if="edit" class="btn btn-danger btn-xs editButton" @click.stop="deleteBook">删除</button>
         </transition>
         <transition name="button-fade">
-            <button v-if="add&&searchState" class="btn btn-success btn-xs editButton" @click="addBook">添加到书架</button>    
+            <button v-if="add&&searchState" class="btn btn-success btn-xs editButton" @click.stop="addBook">添加到书架</button>
         </transition>
     </div>
 </template>
@@ -52,25 +52,27 @@
                 unreadChapter: 0,
                 author: "",
                 lastreadChapter: "",
-                bookImageSrc:"",
-                latest:"",
-                introduction:"",
+                bookImageSrc: "",
+                latest: "",
+                introduction: "",
+                list: [],
                 searchState: this.search,
                 add: true
             }
         },
-        methods:{
-            addBook(){
+        methods: {
+            addBook() {
                 this.add = false;
                 this.$emit("addToStore");
+                this.$emit("addBookIndex",this.list,this.bookSrc);
             },
-            deleteBook(){
+            deleteBook() {
                 this.$emit("deleteFromStore");
             },
-            clickRightMouse(e){
+            clickRightMouse(e) {
                 e.preventDefault();
             },
-            parseBook(res){
+            parseBook(res) {
                 var parser = new DOMParser();
                 var doc = parser.parseFromString(res.data, "text/html");
                 var info = doc.getElementsByClassName("info")[0];
@@ -79,39 +81,46 @@
                 this.author = info.getElementsByClassName('detail')[0].getElementsByTagName('i')[0].innerText;
                 this.latest = info.getElementsByClassName('detail')[2].getElementsByTagName('i')[0].innerText;
                 var desc = info.getElementsByClassName('desc')[0].innerText;
-                this.introduction = desc.slice(desc.indexOf('介')+2).trim();
-                if(this.introduction.length==0) this.introduction = "尚无简介";
-                if(!this.search){
-                    var list_href = info.getElementsByClassName('btn-info')[0].href;
-                    this.$http.get(list_href).then(listRes => {
-                        var listHtml = parser.parseFromString(listRes.data,"text/html");
-                        var list = listHtml.getElementsByClassName('col3');
-                        this.unreadChapter = list.length - this.read;
-                        for(let i = 0; i < list.length; i++){
-                            if(list[i].innerText.slice(0,3)=="第一章"){
-                                this.lastreadChapter = list[i].innerText;
-                            }
+                this.introduction = desc.slice(desc.indexOf('介') + 2).trim();
+                if (this.introduction.length == 0) this.introduction = "尚无简介";
+
+                var list_href = info.getElementsByClassName('btn-info')[0].href;
+                this.$http.get(list_href).then(listRes => {
+                    var listHtml = parser.parseFromString(listRes.data, "text/html");
+                    var list =Array.from(listHtml.getElementsByClassName('col3'));
+                    for (let i = 0; i < list.length; i++) {
+                        if (list[i].innerText.slice(0, 3) == "第一章") {
+                            list = list.slice(i);
+                            break;
                         }
+                    }
+                    this.unreadChapter = list.length - this.read;
+                    this.lastreadChapter = list[0].innerText;
+                    list.forEach(e => {
+                        var obj = {};
+                        obj['name'] = e.innerText;
+                        obj['link'] = e.firstElementChild.href;
+                        this.list.push(obj);
                     })
-                }
+                })
             }
         },
-        computed:{
-            edit: function(){
-                if(this.search) return false;
+        computed: {
+            edit: function() {
+                if (this.search) return false;
                 return this.$store.state.edit;
             }
         },
         beforeMount() {
             this.$http.get(this.bookSrc).then(res => {
                 this.parseBook(res)
-            }).catch(()=>{
+            }).catch(() => {
                 var that = this;
-                setTimeout(function(){
+                setTimeout(function() {
                     that.$http.get(that.bookSrc).then(res => {
                         that.parseBook(res)
                     })
-                },2000)
+                }, 2000)
             })
         }
     }
@@ -161,6 +170,7 @@
         display: inline-block;
         margin-right: 10px;
     }
+
     .editButton {
         position: absolute;
         top: 20px;
@@ -168,13 +178,18 @@
         font-weight: bold;
         outline: none;
     }
-    .editButton:active{
+
+    .editButton:active {
         outline: none;
     }
-    .button-fade-enter-active, .button-fade-leave-active {
-      transition: all .3s;
+
+    .button-fade-enter-active,
+    .button-fade-leave-active {
+        transition: all .3s;
     }
-    .button-fade-enter,.button-fade-leave-to{
+
+    .button-fade-enter,
+    .button-fade-leave-to {
         opacity: 0;
         /* transform: translateY(30px); */
     }

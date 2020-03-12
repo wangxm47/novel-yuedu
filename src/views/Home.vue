@@ -8,13 +8,13 @@
             <div class="books wrapper-padding" v-if="searchState=='nosearch'" key="books">
                 <transition-group name="book-list" tag="div">
                     <Book class="book" v-for="(book,index) in books" :bookId="book.id" :bookName="book.name" :bookSrc="book.booksrc"
-                        :read="book.read" :key="book.id" :search="false" @deleteFromStore="deleteFromStore(index)" />
+                        :read="book.read" :key="book.id" :search="false" @deleteFromStore="deleteFromStore(index)" @click.native="readBook(book)"/>
                 </transition-group>
             </div>
             <div class="books wrapper-padding" @scroll="scrollBook" v-else-if="searchState=='searchend'" key="result">
                 <transition-group name="book-list" tag="div">
                     <Book class="book" v-for="(book,index) in searchBooks" :bookId="book.id" :bookName="book.name"
-                        :bookSrc="book.booksrc" :read="book.read" :key="book.id" :search="true" @addToStore="addToStore(index)" />
+                        :bookSrc="book.booksrc" :read="book.read" :key="book.id" :search="true" @addToStore="addToStore(index)" @addBookIndex="addBookIndex"/>
                 </transition-group>
                 <div v-if="loadingNext" class="wait-loading wrapper-padding" key="wait">
                     <div class="dot"></div>
@@ -80,8 +80,18 @@
             }
         },
         methods: {
+            readBook(book){
+                console.log(book);
+                this.$router.push({name: 'novel',params:{book: book}});
+            },
             messageClose(index) {
                 this.messages.splice(index, 1);
+            },
+            addBookIndex(list,src){
+                if(this.books[0].booksrc == src){
+                    this.books[0]["index"] = list; 
+                }
+                return;
             },
             addToStore(index) {
                 var book = this.searchBooks[index]
