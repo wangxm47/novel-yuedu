@@ -6,13 +6,6 @@ Vue.directive("clickoutside", {
             if (el.contains(e.target)) {
                 return false;
             }
-            var node = e.target;
-            while (!node || node.parentNode != document) {
-                if (node == null || node.hasAttribute("clickoutside")) {
-                    return false;
-                }
-                if (node) node = node.parentNode;
-            }
             if (binding.expression) {
                 binding.value();
             }
