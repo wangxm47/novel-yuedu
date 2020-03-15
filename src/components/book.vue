@@ -95,7 +95,7 @@
                         }
                     }
                     this.unreadChapter = list.length - this.read;
-                    this.lastreadChapter = list[0].innerText;
+                    this.lastreadChapter = list[this.read].innerText;
                     list.forEach(e => {
                         var obj = {};
                         obj['name'] = e.innerText;

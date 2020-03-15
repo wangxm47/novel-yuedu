@@ -1,20 +1,22 @@
 <template>
-    <div class="home">
+    <div class="home" :class="myMode">
         <div class='aside wrapper-padding'>
             <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle"
-                @deleteAllBook="deleteAllBook" />
+                @deleteAllBook="deleteAllBook" :class="myAside" />
         </div>
         <transition name="books-fade" mode="out-in">
             <div class="books wrapper-padding" v-if="searchState=='nosearch'" key="books">
                 <transition-group name="book-list" tag="div">
                     <Book class="book" v-for="(book,index) in books" :bookId="book.id" :bookName="book.name" :bookSrc="book.booksrc"
-                        :read="book.read" :key="book.id" :search="false" @deleteFromStore="deleteFromStore(index)" @click.native="readBook(book)"/>
+                        :read="book.read" :key="book.id" :search="false" @deleteFromStore="deleteFromStore(index)"
+                        @click.native="readBook(book)" />
                 </transition-group>
             </div>
             <div class="books wrapper-padding" @scroll="scrollBook" v-else-if="searchState=='searchend'" key="result">
                 <transition-group name="book-list" tag="div">
                     <Book class="book" v-for="(book,index) in searchBooks" :bookId="book.id" :bookName="book.name"
-                        :bookSrc="book.booksrc" :read="book.read" :key="book.id" :search="true" @addToStore="addToStore(index)" @addBookIndex="addBookIndex"/>
+                        :bookSrc="book.booksrc" :read="book.read" :key="book.id" :search="true" @addToStore="addToStore(index)"
+                        @addBookIndex="addBookIndex" />
                 </transition-group>
                 <div v-if="loadingNext" class="wait-loading wrapper-padding" key="wait">
                     <div class="dot"></div>
@@ -79,17 +81,34 @@
                 msgNum: 0
             }
         },
+        computed: {
+            myMode() {
+                return this.$store.state.mode;
+            },
+            myAside() {
+                if (this.$store.state.mode == 'sun') {
+                    return "aside-sun";
+                } else {
+                    return "aside-night";
+                }
+            }
+        },
         methods: {
-            readBook(book){
-                console.log(book);
-                this.$router.push({name: 'novel',params:{book: book}});
+            readBook(book) {
+                //console.log(book);
+                this.$router.push({
+                    name: 'novel',
+                    params: {
+                        book: book
+                    }
+                });
             },
             messageClose(index) {
                 this.messages.splice(index, 1);
             },
-            addBookIndex(list,src){
-                if(this.books[0].booksrc == src){
-                    this.books[0]["index"] = list; 
+            addBookIndex(list, src) {
+                if (this.books[0].booksrc == src) {
+                    this.books[0]["index"] = list;
                 }
                 return;
             },
@@ -290,6 +309,38 @@
                     });
                 }
             }
+            var dbRequest1 = window.indexedDB.open("setting");
+            dbRequest1.onsuccess = function(event) {
+                var db = event.target.result;
+                var store = db.transaction("mySetting", 'readwrite').objectStore("mySetting");
+                store.openCursor().onsuccess = function(event) {
+                    var cursor = event.target.result;
+                    if (cursor) {
+                        that.$store.commit("setMode", cursor.value.mode);
+                        return;
+                    } else {
+                        store.add({mode:"sun", color:"white",suncolor:"white"});
+                    }
+                }
+            }
+            dbRequest1.onupgradeneeded = function(event) {
+                var db = event.target.result;
+                var store;
+                if (!db.objectStoreNames.contains("mySetting")) {
+                    store = db.createObjectStore("mySetting", {
+                        autoIncrement: true
+                    });
+                    store.createIndex("mode", "mode", {
+                        unique: true
+                    });
+                    store.createIndex("color", "color", {
+                        unique: true
+                    });
+                    store.createIndex("suncolor", "suncolor", {
+                        unique: true
+                    });
+                }
+            }
         }
     }
 </script>
@@ -299,6 +350,14 @@
         min-width: 1095px;
         min-height: 500px;
         height: 100%;
+    }
+
+    .sun {
+        background-color: white;
+    }
+
+    .night {
+        background-color: #000000;
     }
 
     .wrapper-padding {
@@ -326,8 +385,15 @@
     .aside {
         width: 320px;
         min-width: 320px;
-        background-color: #f7f7f7;
         overflow: hidden;
+    }
+
+    .aside-sun {
+        background-color: #f7f7f7;
+    }
+
+    .aside-night {
+        background-color: #000000;
     }
 
     .books,

@@ -16,6 +16,13 @@ export default new Vuex.Store({
               state.mode = "sun"
           }
       },
+      setMode: function(state,mode){
+          if(mode!="sun"&&mode!="night"){
+              state.mode = "sun";
+          } else {
+              state.mode = mode;
+          }
+      },
       editBook: function(state){
           if(!state.edit){
               state.edit = true;

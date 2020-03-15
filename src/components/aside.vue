@@ -116,6 +116,27 @@
             },
             changeMode() {
                 this.$store.commit('changeMode');
+                var that = this;
+                var dbRequest1 = window.indexedDB.open("setting");
+                dbRequest1.onsuccess = function(event) {
+                    var db = event.target.result;
+                    var store = db.transaction("mySetting", 'readwrite').objectStore("mySetting");
+                    store.openCursor().onsuccess = function(event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            var temp = cursor.value;
+                            temp.mode = that.$store.state.mode;
+                            if(temp.mode == "sun" && temp.color=="black"){
+                                temp.color = temp.suncolor;
+                            } else if(temp.mode == "night" && temp.color!="black"){
+                                temp.suncolor = temp.color;
+                                temp.color = "black";
+                            }
+                            cursor.update(temp);
+                            cursor.continue();
+                        }
+                    }
+                }
             },
             editBook() {
                 this.$store.commit('editBook');
