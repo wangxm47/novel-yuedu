@@ -85,6 +85,10 @@
                 if (this.introduction.length == 0) this.introduction = "尚无简介";
 
                 var list_href = info.getElementsByClassName('btn-info')[0].href;
+                if(list_href[4]!="s"){
+                    list_href = list_href.replace("app","https");
+                }
+                //console.log(list_href);
                 this.$http.get(list_href).then(listRes => {
                     var listHtml = parser.parseFromString(listRes.data, "text/html");
                     var list =Array.from(listHtml.getElementsByClassName('col3'));
@@ -112,12 +116,18 @@
             }
         },
         beforeMount() {
-            this.$http.get(this.bookSrc).then(res => {
+            var src = this.bookSrc;
+            if(src[4]!="s"){
+                //src = src.replace("http://www.ymxxs.com","");
+                src = src.replace("app","https");
+            }
+            //console.log(src);
+            this.$http.get(src).then(res => {
                 this.parseBook(res)
             }).catch(() => {
                 var that = this;
                 setTimeout(function() {
-                    that.$http.get(that.bookSrc).then(res => {
+                    that.$http.get(that.src).then(res => {
                         that.parseBook(res)
                     })
                 }, 2000)

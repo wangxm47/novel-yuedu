@@ -1,6 +1,6 @@
 <template>
     <div class="home" :class="myMode">
-        <div class='aside wrapper-padding'>
+        <div class='aside'>
             <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle"
                 @deleteAllBook="deleteAllBook" :class="myAside" />
         </div>
@@ -386,6 +386,7 @@
         width: 320px;
         min-width: 320px;
         overflow: hidden;
+        height: 100%;
     }
 
     .aside-sun {
