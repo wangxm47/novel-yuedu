@@ -131,7 +131,7 @@
                         this.$store.commit("changeMode");
                     }
                 }
-                console.log(this.myColor);
+                //console.log(this.myColor);
                 var that = this;
                 var dbRequest1 = window.indexedDB.open("setting");
                 dbRequest1.onsuccess = function(event) {
@@ -157,7 +157,11 @@
             getText() {
                 this.text = "";
                 this.load = true;
-                this.$http.get(this.bookIndex[this.read].link).then(res => {
+                var link = this.bookIndex[this.read].link;
+                if(link[4]!="s"){
+                    link = link.replace("app","https");
+                }
+                this.$http.get(link).then(res => {
                     var parser = new DOMParser();
                     var doc = parser.parseFromString(res.data, "text/html");
                     var text = new String(doc.getElementById('content').innerHTML);
@@ -171,7 +175,8 @@
                         type: "error",
                         message: "加载失败!"
                     });
-                })
+                });
+                window.scrollTo(0,0);
             },
             showBookIndex() {
                 this.showIndex = !this.showIndex;
