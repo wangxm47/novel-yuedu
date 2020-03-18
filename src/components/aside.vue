@@ -41,7 +41,7 @@
             <div v-else key="history-setting-wrapper">
                 <div class='history-wrapper'>
                     <h4>最近阅读</h4>
-                    <div :class="{'no-history':!noHistory,history:noHistory}">{{name}}</div>
+                    <div :class="{'no-history':!noHistory,history:noHistory}" @click="goToLatestBook">{{name}}</div>
                 </div>
                 <div class='setting-wrapper'>
                     <h4>基本设定</h4>
@@ -66,13 +66,12 @@
         name: 'Aside',
         props: {
             latestBook: {
-                type: String,
-                default: ''
+                default: null,
+                required: true
             },
         },
         data() {
             return {
-                bookName: this.latestBook,
                 searchKey: "",
                 searchHistory: [],
                 onSearch: false
@@ -80,10 +79,10 @@
         },
         computed: {
             name() {
-                if (this.bookName == '') {
+                if (this.latestBook == null) {
                     return "尚无最近阅读记录";
                 } else {
-                    return this.bookName;
+                    return this.latestBook.name;
                 }
 
             },
@@ -105,6 +104,18 @@
             }
         },
         methods: {
+            goToLatestBook(){
+              if(this.latestBook==null){
+                  return;
+              }else{
+                  this.$router.push({
+                      name: 'novel',
+                      params: {
+                          book: this.latestBook
+                      }
+                  });
+              }  
+            },
             onSearchHandle() {
                 this.onSearch = true;
                 this.$emit("beforesearch");

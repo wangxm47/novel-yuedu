@@ -2,14 +2,14 @@
     <div class="home" :class="myMode">
         <div class='aside'>
             <Aside @searching="onSearching" @noSearch="noSearchHandle" @beforesearch="beforesearchHandle"
-                @deleteAllBook="deleteAllBook" :class="myAside" />
+                @deleteAllBook="deleteAllBook" :class="myAside" :latestBook="latestBook" />
         </div>
         <transition name="books-fade" mode="out-in">
             <div class="books wrapper-padding" v-if="searchState=='nosearch'" key="books">
                 <transition-group name="book-list" tag="div">
                     <Book class="book" v-for="(book,index) in books" :bookId="book.id" :bookName="book.name" :bookSrc="book.booksrc"
                         :read="book.read" :key="book.id" :search="false" @deleteFromStore="deleteFromStore(index)"
-                        @click.native="readBook(book)" />
+                        @click.native="readBook(book)" @updateBookIndex="updateBookIndex" />
                 </transition-group>
             </div>
             <div class="books wrapper-padding" @scroll="scrollBook" v-else-if="searchState=='searchend'" key="result">
@@ -78,7 +78,8 @@
                 timer: null,
                 loadingNext: false,
                 messages: [],
-                msgNum: 0
+                msgNum: 0,
+                latestBook: null
             }
         },
         computed: {
@@ -96,6 +97,22 @@
         methods: {
             readBook(book) {
                 //console.log(book);
+                this.latestBook = book;
+                var that = this;
+                var dbRequest1 = window.indexedDB.open("setting");
+                dbRequest1.onsuccess = function(event) {
+                    var db = event.target.result;
+                    var store = db.transaction("mySetting", 'readwrite').objectStore("mySetting");
+                    store.openCursor().onsuccess = function(event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            var temp = cursor.value;
+                            temp.latestBook = that.latestBook;
+                            cursor.update(temp);
+                            cursor.continue();
+                        }
+                    }
+                }
                 this.$router.push({
                     name: 'novel',
                     params: {
@@ -111,6 +128,31 @@
                     this.books[0]["index"] = list;
                 }
                 return;
+            },
+            updateBookIndex(src, list) {
+                for (let book of this.books) {
+                    if (book.booksrc == src) {
+                        book.index = list;
+                        var dbRequest = window.indexedDB.open("bookData");
+                        dbRequest.onsuccess = function(event) {
+                            var db = event.target.result;
+                            var store = db.transaction("books", 'readwrite').objectStore("books");
+                            store.openCursor().onsuccess = function(event) {
+                                var cursor = event.target.result;
+                                if (cursor) {
+                                    if (cursor.value.id == book.id) {
+                                        var temp = cursor.value;
+                                        temp.index = book.index;
+                                        cursor.update(temp);
+                                        return;
+                                    }
+                                    cursor.continue();
+                                }
+                            }
+                        }
+                        return;
+                    }
+                }
             },
             addToStore(index) {
                 var book = this.searchBooks[index]
@@ -317,9 +359,15 @@
                     var cursor = event.target.result;
                     if (cursor) {
                         that.$store.commit("setMode", cursor.value.mode);
+                        that.latestBook = cursor.value.latestBook;
                         return;
                     } else {
-                        store.add({mode:"sun", color:"white",suncolor:"white"});
+                        store.add({
+                            latestBook: null,
+                            mode: "sun",
+                            color: "white",
+                            suncolor: "white"
+                        });
                     }
                 }
             }
@@ -329,6 +377,9 @@
                 if (!db.objectStoreNames.contains("mySetting")) {
                     store = db.createObjectStore("mySetting", {
                         autoIncrement: true
+                    });
+                    store.createIndex("latestBook", "latestBook", {
+                        unique: true
                     });
                     store.createIndex("mode", "mode", {
                         unique: true

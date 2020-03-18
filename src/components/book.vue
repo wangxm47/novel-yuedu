@@ -93,7 +93,7 @@
                     var listHtml = parser.parseFromString(listRes.data, "text/html");
                     var list =Array.from(listHtml.getElementsByClassName('col3'));
                     for (let i = 0; i < list.length; i++) {
-                        if (list[i].innerText.slice(0, 3) == "第一章") {
+                        if (list[i].innerText.slice(0, 3) == "第一章"||list[i].innerText.slice(0, 3) == "第1章") {
                             list = list.slice(i);
                             break;
                         }
@@ -106,6 +106,9 @@
                         obj['link'] = e.firstElementChild.href;
                         this.list.push(obj);
                     })
+                    if(!this.search){
+                        this.$emit("updateBookIndex",this.bookSrc,this.list);
+                    }
                 })
             }
         },
