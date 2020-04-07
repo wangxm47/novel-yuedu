@@ -57,7 +57,7 @@
 
 <script>
     // @ is an alias to /src
-    import Book from '@/components/Book.vue'
+    import Book from '@/components/book.vue'
     import Aside from '@/components/aside.vue'
     import Loading from '@/components/loading.vue'
     import Message from '@/components/message.vue'
