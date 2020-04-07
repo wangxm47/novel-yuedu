@@ -180,6 +180,9 @@
             },
             showBookIndex() {
                 this.showIndex = !this.showIndex;
+                this.$nextTick(function(){
+                    document.getElementsByClassName("active")[0].scrollIntoView();
+                })
             },
             closeBookIndex() {
                 this.showIndex = false;
